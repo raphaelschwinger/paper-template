@@ -1,0 +1,9 @@
+{
+  "learning_curve.pdf": {
+    "document": "paper-example",
+    "inputs": {
+      "data/figures/learning_curve.csv": "a1602c1d69cc45e9a6657c5d05b148928d4d5cd9202166eaa97f92129219a48b"
+    },
+    "script": "figures/learning_curve.yml"
+  }
+}

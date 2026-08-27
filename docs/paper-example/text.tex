@@ -1,0 +1,99 @@
+%% The body of the paper — every section lives here.
+%%
+%% THIS FILE IS YOURS. `make set-template` rewrites main.tex but never touches
+%% this file, so the same prose compiles under every template. Two rules keep
+%% that true (see tools/templates/README.md):
+%%
+%%   * cite with \citep / \citet — every template loads natbib
+%%   * anything you \begin{} must come from researchcommon.sty, not from one
+%%     template's preamble
+
+\section{Introduction}
+\label{sec:introduction}
+
+Experiment code and the paper written about it normally live in separate
+repositories, and the numbers travel between them by hand. They then go stale
+silently: nothing connects the figure in the PDF to the runs it summarizes, and
+a table copied out of a notebook keeps its authority long after the sweep that
+produced it was rerun. This repository closes that gap without merging the two
+codebases: the paper fetches its numbers from the experiment tracker, records
+which runs it fetched, and fails to build when the two disagree.
+
+\begin{contributions}
+\item A committed, human-readable cache of experiment-tracker results, with
+  the exact run identifiers behind it pinned in a lockfile, so a paper's
+  numbers are reproducible without access to the tracker.
+  \label{c:cache}
+\item Figures and tables generated from that cache with recorded provenance,
+  which makes staleness a build failure rather than a reading error.
+  \label{c:provenance}
+\item A document directory that compiles standalone---on Overleaf, and as a
+  flattened submission bundle---and whose prose survives a change of venue
+  template.
+  \label{c:portable}
+\end{contributions}
+
+\section{Method}
+\label{sec:method}
+
+% NOTE: `% NOTE:` comments are author instructions for prose that is planned but
+% not yet written. Agents must treat the nearest NOTE as the specification for
+% what belongs there, and must never delete or rewrite one. See ../../AGENTS.md.
+
+% NOTE: describe the actual method here. This placeholder section exists only so
+% the example compiles to a plausible short paper.
+
+The synthetic study behind \cref{fig:learning_curve} stands in for a real
+experiment. Deep reinforcement learning from pixels \citep{mnih2015human} is
+sample-inefficient, which motivated episodic control methods
+\citep{blundell2016modelfree,pritzel2017neural}. \citet{oquab2024dinov2} showed
+that self-supervised features transfer broadly; replacing an episodic
+controller's state encoder with such features is the kind of question this
+repository layout is built to support.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{architecture.pdf}
+  \caption{Example schematic: a world-model control loop. The source is
+    \texttt{figures/architecture.drawio}; regenerate the export with
+  \texttt{make drawio}.}
+  \label{fig:architecture}
+\end{figure}
+
+Hand-authored diagrams live beside the data-figure configs, as
+\texttt{.drawio} sources. \Cref{fig:architecture} is one: it is drawn by hand,
+not fetched from the tracker, and its PDF is a generated export.
+
+\section{Results}
+\label{sec:results}
+
+Neither \cref{fig:learning_curve} nor \cref{tab:final_scores} is drawn or typed
+by hand. Both are rendered from \texttt{data/learning\_curves.csv} and
+\texttt{data/final\_scores.csv}, which \texttt{make fetch} writes from the runs
+pinned in \texttt{data/wandb.lock.yml}. Each output records the content hash of
+the file it read, so changing the data without rebuilding fails
+\texttt{make check-generated} instead of quietly shipping a stale result.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{learning_curve.pdf}
+  \caption{Learning curves for the synthetic example study: mean over five
+    seeds, shaded band is one standard deviation. Regenerate with
+  \texttt{make plots}.}
+  \label{fig:learning_curve}
+\end{figure}
+
+\begin{table}[!t]
+  \centering
+  \caption{Final score after training, mean over five seeds. The tabular is
+  generated; the caption, label and float placement are not.}
+  \label{tab:final_scores}
+  \input{tables/final_scores.tex}
+\end{table}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Delete this paper and write your own. Keep the structure: one bibliography and
+one cache as sources of truth, generated files committed where the compiler
+needs them, and a check that tells you when the two have drifted apart.

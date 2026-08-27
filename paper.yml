@@ -1,0 +1,32 @@
+# Repository-wide defaults.
+#
+# This file holds ONLY what every figure and table would otherwise repeat: the
+# W&B connection, and the house style. It deliberately declares no datasets —
+# each figure and table owns its own data, in its own config file:
+#
+#   figures/<name>.yml   ->  figures/generated/<name>.pdf
+#   tables/<name>.yml    ->  docs/<document>/tables/<name>.tex
+#
+# Anything set here can be overridden by an individual config.
+
+wandb:
+  entity: your-wandb-entity
+  project: your-wandb-project
+
+# Decimal places written to the CSV cache. Rounding is not cosmetic: numpy
+# dispatches to whatever BLAS the wheel found (Accelerate on macOS, OpenBLAS in
+# CI) and the summation orders disagree in the last bits. Without rounding, the
+# same fetch on two machines produces two different files.
+round: 6
+
+# House style. Inherited by every figure config's `plot:` block.
+style:
+  # Sized for one column of a two-column paper, in inches.
+  width: 3.3
+  height: 2.2
+  # Series colours are drawn from this palette in order. Named colours come from
+  # paperkit.plotting.COLORS, which the draw.io styles share, so hand-drawn
+  # diagrams and data plots agree.
+  palette: [blue, green, orange, red, purple, grey]
+  legend:
+    frameon: false

@@ -1,0 +1,4 @@
+method,mean,std,count
+baseline,0.615487,0.006369,5
+pretrained,0.861214,0.005095,5
+scratch,0.672154,0.007642,5

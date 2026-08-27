@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: checks (lint, tests, generated files)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --frozen
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Tests
+        run: uv run pytest
+
+      - name: Generated files are current
+        run: make check-generated
+
+      # `--check` only inspects committed SVG exports; it does not need the
+      # draw.io desktop CLI, which cannot run headless here.
+      - name: draw.io exports are normalized
+        run: make check-figures
+
+      # The check that justifies committing figures and tables at all: rebuild
+      # them from the committed cache and require the result back byte for
+      # byte, on a different machine than the one that made them. No W&B
+      # secret is involved — that is the point of committing the CSVs.
+      #
+      # If this fails, a figure depends on something that is not in the
+      # repository (a system font, a timestamp, an unsorted dict) and the
+      # committed PDF is not reproducible.
+      - name: Figures and tables are reproducible
+        run: |
+          make plots
+          make tables
+          git diff --exit-code -- docs/ figures/generated/
+
+  paper:
+    name: paper (compile + submission bundle)
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --frozen
+
+      # Runs in a clean container, so no global ~/.latexmkrc can leak into the
+      # build — which is exactly why this is checked here as well as locally.
+      - name: Generated files are current
+        run: make check-generated
+
+      - name: Compile every document
+        run: make papers
+
+      - name: Submission bundle builds
+        run: make arxiv
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: papers
+          path: docs/*/build/main.pdf
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: submission-bundles
+          path: build/*-arxiv.zip
+          if-no-files-found: ignore
+
+  templates:
+    name: templates (every template compiles the same prose)
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --frozen
+
+      # A template that stops compiling is invisible until someone switches to
+      # it months later, mid-deadline. Compile the first document under every
+      # template on every push, and require the prose to come through untouched.
+      - name: All templates build
+        # Plain POSIX sh: the texlive image has no bash, so GitHub falls back to
+        # `sh -e {0}` and brace expansion is not available here.
+        run: |
+          set -eu
+          PAPER=$(basename "$(dirname "$(ls docs/*/main.tex | head -1)")")
+          BEFORE=$(sha256sum \
+            "docs/$PAPER/metadata.tex" "docs/$PAPER/abstract.tex" \
+            "docs/$PAPER/text.tex" "docs/$PAPER/acronyms.tex")
+          for t in $(ls -d tools/templates/*/ | xargs -n1 basename | grep -v '^_'); do
+            echo "::group::$t"
+            make set-template PAPER="$PAPER" TEMPLATE="$t" FORCE=1
+            rm -rf "docs/$PAPER/build"
+            make paper PAPER="$PAPER"
+            test -f "docs/$PAPER/build/main.pdf" || { echo "no PDF for $t"; exit 1; }
+            echo "::endgroup::"
+          done
+          echo "$BEFORE" | sha256sum --check --status \
+            || { echo "a template switch modified the prose files"; exit 1; }

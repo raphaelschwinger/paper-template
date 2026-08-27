@@ -1,0 +1,6 @@
+description: IEEE conference paper (IEEEtran, two column)
+documentclass: "IEEEtran [conference]"
+bibstyle: IEEEtranN
+needs_shell_escape: false
+assets:
+  - _shared/researchcommon.sty

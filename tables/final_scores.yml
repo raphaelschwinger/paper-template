@@ -1,0 +1,39 @@
+# A table: where its numbers come from, and how it is laid out.
+#
+#   make fetch DATASET=tables/final_scores   pull its data from W&B
+#   make tables                              rewrite it
+#
+# The output is a bare `tabular`. The caption, the label and the float placement
+# belong to the prose, in text.tex:
+#
+#   \begin{table}[!t]
+#     \centering
+#     \caption{...}
+#     \label{tab:final_scores}
+#     \input{tables/final_scores.tex}
+#   \end{table}
+
+document: paper-example
+
+data:
+  kind: summary                       # one row per run, from its summary metrics
+  filters:
+    tags: paper-v1
+    state: finished
+  keys: [eval/return]
+  config: [method, seed]
+  aggregate:
+    by: [method]
+    of: eval/return
+    stats: [mean, std, count]
+
+table:
+  # Order defines the layout. `from` is a column in the fetched CSV.
+  columns:
+    - {from: method, as: Method}
+    - {from: mean, as: Score, decimals: 2}
+    - {from: std, as: SD, decimals: 2}
+    - {from: count, as: Seeds, decimals: 0}
+  sort:
+    by: mean
+    ascending: false

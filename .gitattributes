@@ -1,0 +1,39 @@
+# Generated files that flow one way: sources of truth -> document directory.
+#
+# `merge=ours` keeps OUR version when a merge brings in someone else's edit to
+# a generated file — a coauthor working in Overleaf, or a `make template-update`
+# from the upstream template. These files are rebuilt by `make sync-bib`,
+# `make plots` and `make tables`, so a merge could only ever corrupt them.
+#
+# New bibliography entries a coauthor adds on Overleaf are NOT lost by this:
+# `tools/bib_absorb.py` lifts them into the root references.bib before the copy
+# is regenerated. See AGENTS.md, "Overleaf".
+#
+# `merge=ours` needs a driver by that name to exist in each clone. It cannot be
+# committed; bootstrap.sh sets it, or run once:  git config merge.ours.driver true
+docs/*/references.bib       merge=ours
+docs/*/main.tex             merge=ours
+docs/*/.template.yml        merge=ours
+docs/*/*.sty                merge=ours
+docs/*/tables/*.tex         merge=ours
+docs/*/figures/*.pdf        binary merge=ours
+docs/*/figures/*.png        binary merge=ours
+docs/*/orcid.pdf            binary merge=ours
+figures/generated/*.pdf     binary merge=ours
+figures/generated/*.png     binary merge=ours
+
+# Binary assets: never try to diff or merge these line-wise.
+*.pdf                 binary
+*.png                 binary
+figures/generated/*.drawio.svg  -diff
+
+# The W&B cache is CSV rather than Parquet precisely so that it diffs: a pull
+# request that changes the paper's numbers shows the change as reviewable text.
+# Normalize its endings like any other tracked text file.
+*.csv   text eol=lf
+*.tex   text eol=lf
+*.bib   text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.py    text eol=lf
+*.sh    text eol=lf

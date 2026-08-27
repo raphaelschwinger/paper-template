@@ -1,0 +1,8 @@
+description: arXiv preprint, upstream kourgeorge/arxiv-style (single column)
+documentclass: "article + arxiv.sty"
+bibstyle: unsrtnat
+needs_shell_escape: false
+assets:
+  - _shared/researchcommon.sty
+  - _shared/orcid.pdf
+  - arxiv-kourgeorge/arxiv.sty

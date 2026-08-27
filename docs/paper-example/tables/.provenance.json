@@ -1,0 +1,9 @@
+{
+  "final_scores.tex": {
+    "document": "paper-example",
+    "inputs": {
+      "data/tables/final_scores.csv": "815ccdb4dd1483a5b3b36b5996dcdbfac99a84eb39607e1f9c9128790c3b9c27"
+    },
+    "script": "tables/final_scores.yml"
+  }
+}

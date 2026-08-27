@@ -1,0 +1,14 @@
+version: 1
+project:
+  title: Background Notes
+  # Reads the root bibliography DIRECTLY — no copy needed. Unlike a document
+  # directory, this site never has to compile standalone, so it can reach up the
+  # tree. Cite with {cite:p}`key`.
+  bibliography:
+    - ../references.bib
+site:
+  template: article-theme
+  title: Background Notes
+  nav: []
+  options:
+    folders: true

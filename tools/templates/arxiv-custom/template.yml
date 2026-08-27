@@ -1,0 +1,8 @@
+description: arXiv preprint, our patched arxiv-style (tighter spacing) — edit the .sty here
+documentclass: "article + arxiv-custom.sty"
+bibstyle: unsrtnat
+needs_shell_escape: false
+assets:
+  - _shared/researchcommon.sty
+  - _shared/orcid.pdf
+  - arxiv-custom/arxiv-custom.sty

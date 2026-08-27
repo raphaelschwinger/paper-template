@@ -1,0 +1,103 @@
+%% ===========================================================================
+%% GENERATED FILE — template: arxiv-custom
+%%
+%% Rewritten by `make set-template PAPER=<doc> TEMPLATE=<name>`. Hand edits are
+%% detected (the pristine hash is recorded in .template.yml) and the switch will
+%% refuse rather than discard them — but they still belong in the template
+%% source, tools/templates/arxiv-custom/main.tex.
+%%
+%% Your writing is NOT here. It lives in:
+%%   metadata.tex   title, authors, affiliations, keywords
+%%   abstract.tex   the abstract
+%%   text.tex       every section
+%%   acronyms.tex   acronym definitions
+%%
+%% arxiv-custom.sty is OURS: tools/templates/arxiv-custom/arxiv-custom.sty is the
+%% editable source, copied here by `make sync-bib`. Change the source, never the
+%% copy. See tools/templates/arxiv-custom/README.md for how it differs from
+%% upstream, and ../../AGENTS.md for the generated-file contract.
+%% ===========================================================================
+\documentclass{article}
+
+%% Our patched arxiv style. Loads geometry and fancyhdr itself — do not
+%% re-import either of them below.
+\usepackage{arxiv-custom}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{url}
+
+\graphicspath{{figures/}{./}}
+
+%% Citations: natbib in every template, so \citep and \citet work identically
+%% whichever template the document uses and text.tex stays portable.
+\usepackage{natbib}
+
+\input{metadata}
+\usepackage{researchcommon}
+
+%% Acronyms — load order is load-bearing, all before hyperref.
+\usepackage[acronym,nopostdot,nonumberlist]{glossaries-extra}
+\makenoidxglossaries
+\RestoreAcronyms
+\setacronymstyle{long-short}
+\input{acronyms}
+
+\usepackage[hidelinks]{hyperref}
+%% `doi` loads hyperref itself, with no options — it must come AFTER our
+%% optioned \usepackage[hidelinks]{hyperref} or LaTeX raises an option clash.
+\usepackage{doi}
+\usepackage{cleveref}
+
+\renewcommand{\headeright}{Preprint}
+\renewcommand{\undertitle}{Preprint}
+\renewcommand{\shorttitle}{\PaperShortTitle}
+
+\hypersetup{
+  pdftitle={\PaperTitle},
+  pdfauthor={\PaperAuthorList},
+  pdfsubject={\PaperSubject},
+  pdfkeywords={\PaperKeywords},
+}
+
+\title{\PaperTitle}
+\date{}   % remove to print today's date under the author block
+
+%% Author block: authblk with ORCID icons, multi-affiliation variant. To add an
+%% author, uncomment their macros in metadata.tex and repeat the \author[1]{...}
+%% line; \affil[n] numbers the affiliations.
+\usepackage{authblk}
+\renewcommand\Authfont{\bfseries}
+\setlength{\affilsep}{0.5em}
+\newbox{\orcid}\sbox{\orcid}{\includegraphics[scale=0.06]{orcid.pdf}}
+
+\author[1]{%
+  \href{\AuthorOneOrcid}{\usebox{\orcid}~\AuthorOneName\thanks{\texttt{\AuthorOneEmail}}}%
+}
+\affil[1]{\AuthorOneAffil}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  \input{abstract}
+\end{abstract}
+
+\keywords{\PaperKeywords}
+
+\input{text}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

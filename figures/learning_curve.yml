@@ -1,0 +1,45 @@
+# A figure: where its numbers come from, and how it is drawn.
+#
+#   make fetch DATASET=figures/learning_curve   pull its data from W&B
+#   make plots                                  redraw it (and every other figure)
+#
+# This one needs no Python. Write a `learning_curve.py` beside this file only if
+# the built-in renderers cannot draw what you need — see figures/README.md.
+
+document: paper-example
+
+# --- where the numbers come from ---------------------------------------------
+# `entity`, `project` and `round` are inherited from paper.yml.
+data:
+  kind: history                       # per-step run history; use for curves
+  filters:
+    tags: paper-v1
+    state: finished
+  keys: [_step, eval/return]          # metrics to pull from the run history
+  config: [method, seed]              # config values joined onto every row
+  samples: 1000                       # W&B history sampling; raise for dense curves
+  # Collapse seeds here rather than in the figure, so the committed CSV stays
+  # small enough to read and to diff.
+  aggregate:
+    by: [method, _step]
+    of: eval/return
+    stats: [mean, std, count]
+
+# --- how it is drawn ----------------------------------------------------------
+plot:
+  kind: line
+  x: _step
+  y: mean
+  band: std                           # shaded +/- band around y
+  group: method                       # one series per value of this column
+  order: [pretrained, scratch, baseline]
+  colors:
+    pretrained: blue
+    scratch: green
+    baseline: grey
+  xlabel: training step
+  ylabel: score
+  xlim: [0, null]                     # null = leave to matplotlib
+  ylim: [0, null]
+  legend:
+    loc: lower right

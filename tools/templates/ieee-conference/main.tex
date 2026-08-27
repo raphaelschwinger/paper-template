@@ -1,0 +1,97 @@
+%% ===========================================================================
+%% GENERATED FILE — template: ieee-conference
+%%
+%% Rewritten by `make set-template PAPER=<doc> TEMPLATE=<name>`. Hand edits are
+%% detected (the pristine hash is recorded in .template.yml) and the switch will
+%% refuse rather than discard them — but they still belong in the template
+%% source, tools/templates/ieee-conference/main.tex, so every document gets them.
+%%
+%% Your writing is NOT here. It lives in:
+%%   metadata.tex   title, authors, affiliations, keywords
+%%   abstract.tex   the abstract
+%%   text.tex       every section
+%%   acronyms.tex   acronym definitions
+%%
+%% This directory must compile standalone — Overleaf builds it with no Python
+%% environment, and `make arxiv` flattens it — so every path below stays inside
+%% it. Never write ../../ anywhere in this file. See ../../AGENTS.md.
+%% ===========================================================================
+\documentclass[conference]{IEEEtran}
+
+%% IEEEtran ships with TeX Live and Overleaf, so it is not vendored. For a
+%% camera-ready submission, vendor the exact IEEEtran.cls/.bst the venue
+%% requires into this directory — publishers check the version.
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+%% Figures sit beside this file so the same source compiles on Overleaf; the
+%% {./} fallback keeps `make arxiv` working after flattening.
+\graphicspath{{figures/}{./}}
+
+%% Citations: natbib in every template, so \citep and \citet work identically
+%% whichever template the document uses and text.tex stays portable.
+%% IEEEtranN.bst is the natbib-compatible IEEEtran style — plain IEEEtran.bst
+%% renders \citet as "(author?)".
+\usepackage[numbers,sort&compress]{natbib}
+
+%% Document metadata: title, authors, keywords. Template-agnostic.
+\input{metadata}
+
+%% Macros the prose depends on. Generated copy; source is tools/templates/_shared/.
+\usepackage{researchcommon}
+
+%% Acronyms. Load order is load-bearing: glossaries-extra, \makenoidxglossaries,
+%% \RestoreAcronyms, \setacronymstyle, \input{acronyms} — ALL before hyperref.
+\usepackage[acronym,nopostdot,nonumberlist]{glossaries-extra}
+\makenoidxglossaries
+\RestoreAcronyms
+\setacronymstyle{long-short}
+\input{acronyms}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\hypersetup{
+  pdftitle={\PaperTitle},
+  pdfauthor={\PaperAuthorList},
+  pdfsubject={\PaperSubject},
+  pdfkeywords={\PaperKeywords},
+}
+
+\begin{document}
+
+\title{\PaperTitle}
+
+%% Author block, IEEEtran form. To add an author, uncomment their macros in
+%% metadata.tex and add a matching \IEEEauthorblockN/\IEEEauthorblockA pair
+%% here — author layouts differ too much between templates to generate.
+\author{%
+  \IEEEauthorblockN{\AuthorOneName}
+  \IEEEauthorblockA{\AuthorOneAffil\\
+  \AuthorOneEmail}
+}
+
+\maketitle
+
+\begin{abstract}
+  \input{abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+  \PaperKeywords
+\end{IEEEkeywords}
+
+\input{text}
+
+\bibliographystyle{IEEEtranN}
+\bibliography{references}
+
+\end{document}

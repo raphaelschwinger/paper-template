@@ -1,0 +1,70 @@
+% =============================================================================
+% SINGLE SOURCE OF TRUTH for every document in this repository.
+%
+% This is the only bibliography file a human edits. Each `docs/<paper>/`
+% directory holds a *generated verbatim copy* so that Overleaf can compile the
+% paper subtree standalone; `make sync-bib` regenerates those copies and
+% `make check-generated` fails if any has drifted.
+%
+% If a coauthor adds an entry on Overleaf, it arrives in the copy. Lift it back
+% into this file with:
+%
+%     make bib-absorb PAPER=<paper>
+%
+% That command only ever APPENDS to this file — your formatting, comments and
+% ordering are never rewritten.
+%
+% Rules:
+%   * Never fabricate an entry. Verify against DOI, DBLP or the publisher page
+%     before adding it.
+%   * Prefer DBLP-exported entries; the bibsource/timestamp fields they carry
+%     are ignored when reconciling copies.
+%   * Keys are `authorYEARkeyword` (e.g. mnih2015human).
+% =============================================================================
+
+@article{mnih2015human,
+  author  = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and
+             Rusu, Andrei A. and Veness, Joel and Bellemare, Marc G. and
+             Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K. and
+             Ostrovski, Georg and Petersen, Stig and Beattie, Charles and
+             Sadik, Amir and Antonoglou, Ioannis and King, Helen and
+             Kumaran, Dharshan and Wierstra, Daan and Legg, Shane and
+             Hassabis, Demis},
+  title   = {Human-level control through deep reinforcement learning},
+  journal = {Nature},
+  volume  = {518},
+  number  = {7540},
+  pages   = {529--533},
+  year    = {2015},
+  doi     = {10.1038/nature14236}
+}
+
+@inproceedings{blundell2016modelfree,
+  author    = {Blundell, Charles and Uria, Benigno and Pritzel, Alexander and
+               Li, Yazhe and Ruderman, Avraham and Leibo, Joel Z. and
+               Rae, Jack and Wierstra, Daan and Hassabis, Demis},
+  title     = {Model-Free Episodic Control},
+  booktitle = {arXiv preprint arXiv:1606.04460},
+  year      = {2016}
+}
+
+@inproceedings{pritzel2017neural,
+  author    = {Pritzel, Alexander and Uria, Benigno and Srinivasan, Sriram and
+               Badia, Adri{\`{a}} Puigdom{\`{e}}nech and Vinyals, Oriol and
+               Hassabis, Demis and Wierstra, Daan and Blundell, Charles},
+  title     = {Neural Episodic Control},
+  booktitle = {Proceedings of the 34th International Conference on Machine Learning
+               (ICML)},
+  pages     = {2827--2836},
+  year      = {2017}
+}
+
+@article{oquab2024dinov2,
+  author  = {Oquab, Maxime and Darcet, Timoth{\'{e}}e and Moutakanni, Th{\'{e}}o and
+             Vo, Huy V. and Szafraniec, Marc and Khalidov, Vasil and
+             Fernandez, Pierre and Haziza, Daniel and Massa, Francisco and
+             El{-}Nouby, Alaaeldin and others},
+  title   = {{DINOv2}: Learning Robust Visual Features without Supervision},
+  journal = {Transactions on Machine Learning Research},
+  year    = {2024}
+}

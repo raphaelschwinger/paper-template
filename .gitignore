@@ -1,0 +1,61 @@
+# --- LaTeX build output -----------------------------------------------------
+build/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.bcf
+*.run.xml
+*.glo
+*.gls
+*.glg
+*.glsdefs
+*.acn
+*.acr
+*.ist
+
+# --- MyST notes site --------------------------------------------------------
+notes/_build/
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+.uv_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- W&B --------------------------------------------------------------------
+# The wandb client writes a local run directory even for read-only API use.
+wandb/
+
+# Scratch space for raw pulls while you work out a query. Only the small,
+# aggregated CSVs at the top of data/ are tracked. See data/README.md.
+data/raw/
+
+# --- OS / editor ------------------------------------------------------------
+.DS_Store
+*.swp
+*~
+
+# Backup written by `make set-template ... FORCE=1` before it overwrites a
+# hand-edited main.tex. Re-apply what you need, then delete it.
+*.tex.bak
+
+# --- Deliberately NOT ignored -----------------------------------------------
+# Do not add patterns for these; they are tracked generated files:
+#   data/<kind>/*.csv              the W&B cache each config is built from —
+#                                  CSV so it diffs in a pull request.
+#   data/wandb.lock.yml            the pinned run set behind those numbers.
+#   figures/generated/*            rendered figure PDFs and draw.io exports.
+#                                  docs/*/figures/ holds Overleaf copies of them.
+#   docs/*/figures/*.pdf           Overleaf compiles the paper with no Python
+#                                  environment, so it cannot build figures.
+#   docs/*/tables/*.tex            same reason.
+#   docs/*/references.bib          materialized copy of the root bib.

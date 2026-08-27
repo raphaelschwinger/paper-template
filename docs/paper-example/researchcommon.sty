@@ -1,0 +1,49 @@
+%% researchcommon.sty — prose-portable macros, shared by every template.
+%%
+%% GENERATED FILE inside a document directory. The source of truth is
+%% tools/templates/_shared/researchcommon.sty; `make sync-bib` copies it out and
+%% `make check-generated` fails if a copy has drifted. Edit the source, not the
+%% copy.
+%%
+%% Everything `text.tex` and `abstract.tex` rely on must be defined HERE rather
+%% than in a template's main.tex. That is what lets `make set-template` swap the
+%% document class without touching a line of your writing: the prose only ever
+%% depends on this file, which every template loads.
+%%
+%% Deliberately does NOT load hyperref, cleveref, glossaries-extra or natbib.
+%% Those are order-sensitive with respect to the document class and are loaded
+%% by each template's main.tex instead.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{researchcommon}[2026/08/27 Shared prose macros for the paper template]
+
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{enumitem}
+
+%% --- Contributions box ------------------------------------------------------
+%% A boxed, numbered list of contributions, referenceable as C1, C2, ...
+%%
+%%   \begin{contributions}
+%%     \item A thing we did. \label{c:thing}
+%%   \end{contributions}
+%%   ... as shown in contribution \ref{c:thing} ...
+%%
+%% Ported from the PretrainWM preamble, where it was copy-pasted per document.
+\newcommand{\contributionlabel}[1]{\small{\textbf{C#1.}}}
+
+\newtcolorbox{contributionsbox}{%
+  title=Contributions,
+  boxrule=1.25pt,
+  left=2pt, right=2pt, top=1pt, bottom=0.5pt,
+}
+
+\newenvironment{contributions}{%
+  \begin{contributionsbox}%
+    \begin{enumerate}[leftmargin=0.9cm, label=\contributionlabel{\arabic*},
+                      ref=C\arabic*, itemsep=1pt, topsep=2pt, parsep=0pt]%
+}{%
+    \end{enumerate}%
+  \end{contributionsbox}%
+}
+
+\endinput

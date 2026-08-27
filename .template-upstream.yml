@@ -1,0 +1,15 @@
+# Where this project's scaffolding came from, and where fixes to it go back.
+#
+# `bootstrap.sh` fills this in and then establishes the merge base, so a
+# generated paper repository is wired up from day one. In the template
+# repository itself it points at the template, which is harmless:
+# `make template-update` finds nothing to merge.
+#
+#   make template-update                                   pull improvements in
+#   make template-contribute BRANCH=fix-x COMMITS=<sha>    send a fix back
+#
+# A fix you make to tools/, the Makefile or a LaTeX template while writing this
+# paper is worth sending back — the next paper starts from it. See README.md,
+# "Staying in sync with the template".
+upstream: https://github.com/raphaelschwinger/paper-template.git
+branch: main
