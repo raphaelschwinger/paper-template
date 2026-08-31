@@ -1,4 +1,18 @@
 {
+  "bbf_speedup_ablation.pdf": {
+    "document": "paper-example",
+    "inputs": {
+      "data/figures/bbf_speedup_ablation.csv": "0fad8f09cb9cfa100a71b3135ee6cc2c81bad0c94a2e554609b49ecfc3295dcd"
+    },
+    "script": "figures/bbf_speedup_ablation.yml"
+  },
+  "dreamjepa_ablation.pdf": {
+    "document": "paper-example",
+    "inputs": {
+      "data/figures/dreamjepa_ablation.csv": "a95b2ed1599a2d1f913508ad08569fccfb1227b8d30e74a59310ce9550abd577"
+    },
+    "script": "figures/dreamjepa_ablation.yml"
+  },
   "learning_curve.pdf": {
     "document": "paper-example",
     "inputs": {

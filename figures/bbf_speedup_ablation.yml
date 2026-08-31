@@ -1,0 +1,110 @@
+# Butterfly ablation figure — BBF runtime tweaks on Atari-100k Jamesbond.
+#
+#   make fetch DATASET=figures/bbf_speedup_ablation REFRESH=1   # pull + pin
+#   make fetch DATASET=figures/bbf_speedup_ablation              # replay pinned runs
+#   make plots ONLY=bbf_speedup_ablation                          # redraw from cache
+#
+# One-at-a-time ablation: † marks a row that changes what the learner computes
+# (as opposed to how fast it computes it) — see plot.delta_reference: first.
+#
+# See figures/README.md, "Ablation figures", for the shape of `data.kind: rows`.
+
+document: paper-example
+
+data:
+  kind: rows
+  entity: LatentLab
+  project: torchrl-hydra-template
+
+  default_filters:
+    state: finished
+    config.trainer.total_frames: 100000
+    config.env_id: Jamesbond-v5
+    config.algorithm._target_: src.algorithms.bbf.BBFAlgorithm
+
+  score:
+    metric: eval/final_return_mean
+  runtime:
+    metric: time/speed
+    aggregate: history
+
+  rows:
+    - label: Published BBF (RR2)
+      section: baseline
+      filters: {config.exp_name: bbf, createdAt: {$gt: "2026-08-01T00:00:00"}}
+
+    - label: torch.compile +
+      section: network_execution
+      filters: {config.exp_name: bbf_ablation_compile}
+    - label: Mixed precision (bf16) +
+      section: network_execution
+      filters: {config.exp_name: bbf_ablation_amp}
+    - label: Channels-last +
+      section: network_execution
+      filters: {config.exp_name: bbf_ablation_channels_last}
+
+    - label: Pinned staging + async H2D +
+      section: data_pipeline
+      filters: {config.exp_name: bbf_ablation_pin_memory}
+    - label: GPU-resident replay +
+      section: data_pipeline
+      filters: {config.exp_name: bbf_ablation_gpu_replay}
+
+    - label: Uniform replay (no PER) †
+      section: learner_changes
+      filters: {config.exp_name: bbf_ablation_uniform}
+    - label: Optimisation batch 32 → 64 ↑ †
+      section: learner_changes
+      filters: {config.exp_name: bbf_ablation_batch64}
+    - label: Optimisation batch 32 → 16 ↓ †
+      section: learner_changes
+      filters: {config.exp_name: bbf_ablation_batch16}
+    - label: Replay ratio 2 → 8 ↑ †
+      section: learner_changes
+      filters: {config.exp_name: bbf_ablation_rr8}
+
+    - label: BBF (fast) — GPU replay + channels-last
+      section: combined
+      highlight: true
+      filters: {config.exp_name: bbf_ablation_combined}
+
+plot:
+  kind: ablation
+  title: BBF runtime tweaks — Atari-100k Jamesbond
+  caption: >-
+    One-at-a-time ablation: † marks a row that changes what the learner computes
+  delta_reference: first
+  meta_position: spine
+  width: 13.5
+  row_height: 0.52
+  show_missing: true
+
+  sections:
+    baseline: {name: Baseline, color: "#c9ccd1"}
+    network_execution: {name: "Network execution", color: "#f7cba4"}
+    data_pipeline: {name: "Data pipeline", color: "#f4a95f"}
+    learner_changes: {name: "Changes the learner †", color: "#b07aa1"}
+    combined: {name: Combined, color: "#3fae7f"}
+
+  score:
+    label: IQM human-normalised score
+    reduce: iqm
+    normalization: human
+    confidence_intervals: true
+    bootstrap_reps: 2000
+    games:
+      Jamesbond-v5: {random: 29.0, human: 302.8}
+    compress_below: auto
+    compress_fraction: 0.25
+    value_format: "{:.1f}"
+    delta_format: "{:+.1f}"
+
+  runtime:
+    label: Training throughput (agent frames/s)
+    reduce: median
+    confidence_intervals: true
+    bootstrap_reps: 2000
+    compress_below: auto
+    compress_fraction: 0.25
+    value_format: "{:.1f}"
+    delta_format: "{:+.1f}"
