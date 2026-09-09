@@ -6,10 +6,17 @@
     },
     "script": "figures/bbf_speedup_ablation.yml"
   },
+  "dreamer_optimisations_ablation.pdf": {
+    "document": "paper-example",
+    "inputs": {
+      "data/figures/dreamer_optimisations_ablation.csv": "ce70062344f0ae4b1f9e98af2653f84a984c35054905017cb0d30bc0885eb021"
+    },
+    "script": "figures/dreamer_optimisations_ablation.yml"
+  },
   "dreamjepa_ablation.pdf": {
     "document": "paper-example",
     "inputs": {
-      "data/figures/dreamjepa_ablation.csv": "a95b2ed1599a2d1f913508ad08569fccfb1227b8d30e74a59310ce9550abd577"
+      "data/figures/dreamjepa_ablation.csv": "0938b07a0baf52b054f90b9c1579f2ce734fa3cbdf79916e458b5876cf35786f"
     },
     "script": "figures/dreamjepa_ablation.yml"
   },

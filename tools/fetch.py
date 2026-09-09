@@ -397,6 +397,7 @@ def fetch_rows(api, pd, config: dict, entry: dict, refresh: bool, dry_run: bool)
                     "game": run.config.get("env_id", "unknown"),
                     "seed": run.config.get("seed", ""),
                     "run_id": run.id,
+                    "wandb_url": f"https://wandb.ai/{entity}/{project}/runs/{run.id}",
                     "state": run.state,
                     "score": float(score),
                     "runtime": "" if runtime is None else float(runtime),
