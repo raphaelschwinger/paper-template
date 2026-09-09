@@ -48,7 +48,7 @@ def test_templates_exist():
 
 
 def test_default_template_is_arxiv_custom():
-    import new_paper  # noqa: E402
+    import new_paper
 
     assert new_paper.DEFAULT_TEMPLATE == "arxiv-custom"
     assert new_paper.DEFAULT_TEMPLATE in _common.list_templates(ROOT)
