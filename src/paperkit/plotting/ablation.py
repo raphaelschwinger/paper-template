@@ -148,9 +148,7 @@ def _iqm(values: np.ndarray) -> float:
     """
     ordered = np.sort(values)
     cut = int(len(ordered) * 0.25)
-    trimmed = (
-        ordered[cut : len(ordered) - cut] if len(ordered) - 2 * cut > 0 else ordered
-    )
+    trimmed = ordered[cut : len(ordered) - cut] if len(ordered) - 2 * cut > 0 else ordered
     return float(np.mean(trimmed))
 
 
@@ -209,9 +207,7 @@ def interval(
             print("  note: rliable unavailable; using a pooled percentile bootstrap")
 
     pooled = np.asarray(arm.values(field_name), dtype=float)
-    draws = [
-        reducer(rng.choice(pooled, size=len(pooled), replace=True)) for _ in range(reps)
-    ]
+    draws = [reducer(rng.choice(pooled, size=len(pooled), replace=True)) for _ in range(reps)]
     return float(np.percentile(draws, 2.5)), float(np.percentile(draws, 97.5))
 
 
@@ -471,9 +467,7 @@ def _draw_half(
                     lw=1.0,
                 )
                 if label_rows:
-                    name = (
-                        _split_markers(arm.label)[0] if split_meta else arm.label
-                    )
+                    name = _split_markers(arm.label)[0] if split_meta else arm.label
                     ax.text(
                         sign * pad,
                         y,
@@ -514,9 +508,7 @@ def _draw_half(
         if split_meta and not label_rows:
             markers = _split_markers(arm.label)[1]
             meta = " ".join(
-                part
-                for part in (markers, f"n={arm.n_runs}" if show_counts else "")
-                if part
+                part for part in (markers, f"n={arm.n_runs}" if show_counts else "") if part
             )
             if meta:
                 ax.text(
@@ -720,9 +712,7 @@ def _resolve_overlaps(fig, placements) -> None:
         for label_art, value_art, x_end, sign in entries:
             label_box = label_art.get_window_extent(renderer=renderer)
             value_box = value_art.get_window_extent(renderer=renderer)
-            overlaps = (
-                label_box.x0 < value_box.x1 if sign < 0 else label_box.x1 > value_box.x0
-            )
+            overlaps = label_box.x0 < value_box.x1 if sign < 0 else label_box.x1 > value_box.x0
             if not overlaps:
                 continue
             tip_px = ax.transData.transform((x_end, 0))[0]
