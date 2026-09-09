@@ -31,8 +31,6 @@ document: paper-example
 
 data:
   kind: rows
-  entity: LatentLab
-  project: torchrl-hydra-template
 
   # Shared by every row (`common.overrides` in the sweep file). Row-specific
   # overrides are the perf flags below, not repeated here.
