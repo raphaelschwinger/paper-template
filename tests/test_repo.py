@@ -132,8 +132,12 @@ def test_config_inherits_paper_yml_defaults():
     paper = _common.read_paper_config(ROOT)
     for kind, name in _common.all_configs(ROOT):
         config = _common.load_config(kind, name, ROOT)
-        assert config["data"]["entity"] == paper["wandb"]["entity"]
-        assert config["data"]["round"] == paper["round"]
+        # paper.yml values are defaults; a config may override them.
+        own = config["raw"].get("data") or {}
+        if "entity" not in own:
+            assert config["data"]["entity"] == paper["wandb"]["entity"]
+        if "round" not in own:
+            assert config["data"]["round"] == paper["round"]
 
 
 def test_configs_match_what_the_lock_pins():
