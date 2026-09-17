@@ -91,6 +91,15 @@ the file it read, so changing the data without rebuilding fails
   \input{tables/final_scores.tex}
 \end{table}
 
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{dreamer_optimisations_ablation.pdf}
+  \caption{DreamerV3 runtime-optimisation ablation on Atari-100k. Rendered from
+    \texttt{data/figures/dreamer\_optimisations\_ablation.csv}, pinned to the
+  runs in \texttt{data/wandb.lock.yml}. Regenerate with \texttt{make plots}.}
+  \label{fig:dreamer_optimisations_ablation}
+\end{figure}
+
 \section{Conclusion}
 \label{sec:conclusion}
 

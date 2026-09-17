@@ -1,0 +1,31 @@
+section,label,game,seed,run_id,wandb_url,state,score,runtime
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,1,0977cbqm,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/0977cbqm,finished,361.500000,8.950181
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,1,58f0omcs,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/58f0omcs,finished,251.000000,9.259717
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,1,h58is3jp,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/h58is3jp,finished,214.500000,9.294970
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,1,rw7ak6cu,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/rw7ak6cu,finished,235.500000,6.673701
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,2,e3bwrxst,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/e3bwrxst,finished,313.500000,6.676056
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,2,g3pwjf8u,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/g3pwjf8u,finished,364.500000,9.302722
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,2,uj7mkyvi,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/uj7mkyvi,finished,247.500000,9.263196
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,3,0vqes5ml,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/0vqes5ml,finished,207.000000,9.307099
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,3,58wdvizl,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/58wdvizl,finished,281.000000,6.611282
+baseline,Baseline (all runtime tweaks off),Jamesbond-v5,3,kswh5dyt,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/kswh5dyt,finished,223.500000,9.300793
+data,GPU-resident replay,Jamesbond-v5,1,0977cbqm,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/0977cbqm,finished,361.500000,8.950181
+data,No online sampling †,Jamesbond-v5,1,58f0omcs,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/58f0omcs,finished,251.000000,9.259717
+data,No online sampling †,Jamesbond-v5,2,g3pwjf8u,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/g3pwjf8u,finished,364.500000,9.302722
+data,No online sampling †,Jamesbond-v5,3,kswh5dyt,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/kswh5dyt,finished,223.500000,9.300793
+data,Pinned staging + async H2D,Jamesbond-v5,1,tgzrnadd,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/tgzrnadd,finished,239.500000,9.274920
+network,Batched LaProp step,Jamesbond-v5,1,w1qgyke6,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/w1qgyke6,finished,449.500000,9.239740
+network,Deduplicated value forward,Jamesbond-v5,1,4krfaltj,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/4krfaltj,finished,332.000000,9.384257
+network,Mixed precision (bf16) †,Jamesbond-v5,1,qd02cgxm,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/qd02cgxm,finished,261.000000,17.790336
+network,Mixed precision (bf16) †,Jamesbond-v5,2,l26kxjag,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/l26kxjag,finished,557.000000,17.837323
+network,Mixed precision (bf16) †,Jamesbond-v5,3,bckhp7cn,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/bckhp7cn,finished,230.000000,17.915116
+network,Mixed precision (fp16 + GradScaler) †,Jamesbond-v5,1,j2nimyoa,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/j2nimyoa,finished,312.000000,17.669218
+network,Mixed precision (fp16 + GradScaler) †,Jamesbond-v5,2,8bstfb3e,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/8bstfb3e,finished,340.000000,17.965746
+network,Mixed precision (fp16 + GradScaler) †,Jamesbond-v5,3,6p29lop8,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/6p29lop8,finished,280.500000,17.794921
+network,Replay batch 8 †,Jamesbond-v5,1,rw7ak6cu,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/rw7ak6cu,finished,235.500000,6.673701
+network,Replay batch 8 †,Jamesbond-v5,2,e3bwrxst,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/e3bwrxst,finished,313.500000,6.676056
+network,Replay batch 8 †,Jamesbond-v5,3,58wdvizl,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/58wdvizl,finished,281.000000,6.611282
+network,Static conv padding,Jamesbond-v5,1,jqtwcfmu,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/jqtwcfmu,finished,525.500000,9.624764
+network,TF32 matmuls,Jamesbond-v5,1,dpnus7fp,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/dpnus7fp,finished,227.500000,10.339762
+network,cuDNN benchmark,Jamesbond-v5,1,zbvxjhjd,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/zbvxjhjd,finished,292.500000,9.760721
+network,torch.compile,Jamesbond-v5,1,vpz22d3h,https://wandb.ai/LatentLab/torchrl-hydra-template/runs/vpz22d3h,finished,205.000000,10.612732

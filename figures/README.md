@@ -80,6 +80,45 @@ then the `plot:` keys are yours to apply or ignore.
 Both forms are picked up automatically. `make configs` shows which figures use
 one.
 
+## Butterfly figures
+
+A butterfly chart (score panel + runtime panel, one row per arm — an ablation's
+modifications, competing methods, a sweep's settings) needs a separate W&B
+query per row, not the single `data.filters:` every other figure uses. It is
+still a normal figure — same `.yml`/`.py` pair, same `make fetch`/`make plots` —
+just with `data.kind: rows` instead of `history`/`summary`:
+
+```yaml
+data:
+  kind: rows
+  entity: LatentLab
+  project: DreamJEPA
+  default_filters: {state: finished}   # merged into every row (its own keys win)
+  score: {metric: eval/final_return_mean}
+  runtime: {metric: time/speed, aggregate: history}
+  rows:
+    - label: DreamJEPA (deter target)
+      section: baseline                 # a bare id — display name & colour live in plot.sections
+      filters: {name: {$in: [7n3l5mfi]}}
+    - label: − SigReg
+      section: regularisation
+      filters: {displayName: {$regex: "^djepa_nosigreg_s[0-9]+$"}}
+
+plot:
+  sections:
+    baseline: {name: Baseline, color: "#9aa0a6"}
+    regularisation: {name: Regularisation, color: "#4bb392"}
+  score: {label: IQM human-normalised score, normalization: human, games: {...}}
+  runtime: {label: Training throughput (agent frames/s)}
+```
+
+`tools/fetch.py` resolves and pins each row independently (`_row_digest`), so
+editing one row's filters never forces re-resolving the rest. `plot.kind:
+butterfly` is a built-in renderer (`paperkit.plotting.butterfly.draw_butterfly`),
+the same way `line`/`bar`/`scatter` are — no `figures/<name>.py` needed.
+
+See `figures/dreamer_optimisations_ablation.yml` for a worked example.
+
 ## draw.io diagrams
 
 Hand-authored architecture diagrams and conceptual figures live here as

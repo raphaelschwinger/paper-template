@@ -1,4 +1,11 @@
 {
+  "dreamer_optimisations_ablation.pdf": {
+    "document": "paper-example",
+    "inputs": {
+      "data/figures/dreamer_optimisations_ablation.csv": "ce70062344f0ae4b1f9e98af2653f84a984c35054905017cb0d30bc0885eb021"
+    },
+    "script": "figures/dreamer_optimisations_ablation.yml"
+  },
   "learning_curve.pdf": {
     "document": "paper-example",
     "inputs": {

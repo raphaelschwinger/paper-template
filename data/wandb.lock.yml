@@ -8,6 +8,201 @@
 # `spec_sha256` is the hash of a config's `data:` block as it stood when the
 # data was fetched. `make check-generated` fails when a config has drifted
 # from it.
+figures/dreamer_optimisations_ablation:
+  entity: LatentLab
+  fetched: '2026-09-09'
+  project: torchrl-hydra-template
+  rows:
+    baseline/Baseline (all runtime tweaks off):
+      runs:
+      - heartbeat: '2026-09-04T09:19:56Z'
+        id: 0977cbqm
+        name: dreamer_Jamesbond_atari100k_2026-09-04_06-00-06
+        state: finished
+      - heartbeat: '2026-09-08T17:32:19Z'
+        id: 0vqes5ml
+        name: dreamer_Jamesbond_atari100k_2026-09-03_16-44-09
+        state: finished
+      - heartbeat: '2026-09-03T16:02:22Z'
+        id: 58f0omcs
+        name: dreamer_Jamesbond_atari100k_2026-09-01_13-09-10
+        state: finished
+      - heartbeat: '2026-09-05T00:30:33Z'
+        id: 58wdvizl
+        name: dreamer_Jamesbond_atari100k_2026-09-04_20-05-09
+        state: finished
+      - heartbeat: '2026-09-04T20:04:58Z'
+        id: e3bwrxst
+        name: dreamer_Jamesbond_atari100k_2026-09-04_15-42-43
+        state: finished
+      - heartbeat: '2026-09-04T12:34:18Z'
+        id: g3pwjf8u
+        name: dreamer_Jamesbond_atari100k_2026-09-04_09-20-04
+        state: finished
+      - heartbeat: '2026-09-03T15:57:21Z'
+        id: h58is3jp
+        name: dreamer_Jamesbond_atari100k_2026-08-31_08-38-52
+        state: finished
+      - heartbeat: '2026-09-04T15:41:52Z'
+        id: kswh5dyt
+        name: dreamer_Jamesbond_atari100k_2026-09-04_12-34-23
+        state: finished
+      - heartbeat: '2026-09-08T17:32:36Z'
+        id: n5906ga2
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-27-49
+        state: finished
+      - heartbeat: '2026-09-08T17:33:10Z'
+        id: oas4n02s
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-29-01
+        state: finished
+      - heartbeat: '2026-09-08T17:32:53Z'
+        id: oboe2awf
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-28-31
+        state: finished
+      - heartbeat: '2026-09-03T16:02:55Z'
+        id: rw7ak6cu
+        name: dreamer_Jamesbond_atari100k_2026-09-01_16-18-17
+        state: finished
+      - heartbeat: '2026-09-03T15:57:50Z'
+        id: uj7mkyvi
+        name: dreamer_Jamesbond_atari100k_2026-08-31_11-46-13
+        state: finished
+      spec_sha256: 4f07f4016fad3a7392ff004c95d4b61058eacce920aef140eac3a6f6e479d867
+    data/GPU-resident replay:
+      runs:
+      - heartbeat: '2026-09-04T09:19:56Z'
+        id: 0977cbqm
+        name: dreamer_Jamesbond_atari100k_2026-09-04_06-00-06
+        state: finished
+      spec_sha256: 043b589fa4b399465b4f277ba677d090085a73205e3de3088abce1ba1edf11e4
+    "data/No online sampling \u2020":
+      runs:
+      - heartbeat: '2026-09-03T16:02:22Z'
+        id: 58f0omcs
+        name: dreamer_Jamesbond_atari100k_2026-09-01_13-09-10
+        state: finished
+      - heartbeat: '2026-09-04T12:34:18Z'
+        id: g3pwjf8u
+        name: dreamer_Jamesbond_atari100k_2026-09-04_09-20-04
+        state: finished
+      - heartbeat: '2026-09-04T15:41:52Z'
+        id: kswh5dyt
+        name: dreamer_Jamesbond_atari100k_2026-09-04_12-34-23
+        state: finished
+      spec_sha256: 20ce0a818c63adb772820e35ac4196a2b0a9da47978de51db2e7ee7e120e91d5
+    data/Pinned staging + async H2D:
+      runs:
+      - heartbeat: '2026-09-03T16:01:53Z'
+        id: tgzrnadd
+        name: dreamer_Jamesbond_atari100k_2026-09-01_09-57-46
+        state: finished
+      spec_sha256: 390387920d9d96a022911205a2fecd5bbcfee5a6db06da4aa9b7ea62096bfcdf
+    "data/Train ratio 512 \u2020 (declared, not run)":
+      runs: []
+      spec_sha256: 0aede4e36afbda74116431175937f29ba6c59c0766dfb4b71ce9bdc4414dc51d
+    network/Batched LaProp step:
+      runs:
+      - heartbeat: '2026-09-03T16:01:22Z'
+        id: w1qgyke6
+        name: dreamer_Jamesbond_atari100k_2026-09-01_06-38-47
+        state: finished
+      spec_sha256: 5a11e9af3f947c9cc4309b2d6909a4757a4269c2fd2b2129d75846cc6fc77aaa
+    network/Deduplicated value forward:
+      runs:
+      - heartbeat: '2026-09-03T16:00:53Z'
+        id: 4krfaltj
+        name: dreamer_Jamesbond_atari100k_2026-09-01_03-29-00
+        state: finished
+      spec_sha256: f4f8c25d65b67525bb6f51f8ddcb11e9002bf413e4c7479b80eb4b0be433d3ab
+    "network/Mixed precision (bf16) \u2020":
+      runs:
+      - heartbeat: '2026-09-08T17:30:33Z'
+        id: bckhp7cn
+        name: dreamer_Jamesbond_atari100k_2026-09-04_04-16-49
+        state: finished
+      - heartbeat: '2026-09-08T17:30:00Z'
+        id: l26kxjag
+        name: dreamer_Jamesbond_atari100k_2026-09-04_02-25-56
+        state: finished
+      - heartbeat: '2026-09-03T15:58:52Z'
+        id: qd02cgxm
+        name: dreamer_Jamesbond_atari100k_2026-08-31_16-43-22
+        state: finished
+      spec_sha256: ce8816f855a6ff2222c026c50c969cde1524ac095cf6fbd91fd247dd5eb41a3e
+    "network/Mixed precision (fp16 + GradScaler) \u2020":
+      runs:
+      - heartbeat: '2026-09-08T17:31:45Z'
+        id: 6p29lop8
+        name: dreamer_Jamesbond_atari100k_2026-09-04_00-41-10
+        state: finished
+      - heartbeat: '2026-09-08T17:31:09Z'
+        id: 8bstfb3e
+        name: dreamer_Jamesbond_atari100k_2026-09-03_22-56-32
+        state: finished
+      - heartbeat: '2026-09-03T15:58:22Z'
+        id: j2nimyoa
+        name: dreamer_Jamesbond_atari100k_2026-08-31_14-55-23
+        state: finished
+      spec_sha256: 173a1760b3a2213ad29c238917e39d8d1c7d7c7fbaafb214c4845e20ad5f39a1
+    "network/Replay batch 32 \u2020":
+      runs:
+      - heartbeat: '2026-09-08T17:32:36Z'
+        id: n5906ga2
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-27-49
+        state: finished
+      - heartbeat: '2026-09-08T17:33:10Z'
+        id: oas4n02s
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-29-01
+        state: finished
+      - heartbeat: '2026-09-08T17:32:53Z'
+        id: oboe2awf
+        name: dreamer_Jamesbond_atari100k_2026-09-08_17-28-31
+        state: finished
+      spec_sha256: 1a278daf22ec66265d665e05a75fe52d9833922e39ee29ff7e6646838441131f
+    "network/Replay batch 8 \u2020":
+      runs:
+      - heartbeat: '2026-09-05T00:30:33Z'
+        id: 58wdvizl
+        name: dreamer_Jamesbond_atari100k_2026-09-04_20-05-09
+        state: finished
+      - heartbeat: '2026-09-04T20:04:58Z'
+        id: e3bwrxst
+        name: dreamer_Jamesbond_atari100k_2026-09-04_15-42-43
+        state: finished
+      - heartbeat: '2026-09-03T16:02:55Z'
+        id: rw7ak6cu
+        name: dreamer_Jamesbond_atari100k_2026-09-01_16-18-17
+        state: finished
+      spec_sha256: 8a00b18091e6f49d878827e62ccc972c3ebe259e64c9081480b8d222ec717f6a
+    network/Static conv padding:
+      runs:
+      - heartbeat: '2026-09-03T15:59:24Z'
+        id: jqtwcfmu
+        name: dreamer_Jamesbond_atari100k_2026-08-31_18-28-41
+        state: finished
+      spec_sha256: c55d947a2f922e8c996415bae264602f5b724e6b596f105335c953b176fca2f0
+    network/TF32 matmuls:
+      runs:
+      - heartbeat: '2026-09-03T16:00:22Z'
+        id: dpnus7fp
+        name: dreamer_Jamesbond_atari100k_2026-09-01_00-38-06
+        state: finished
+      spec_sha256: f8402c9e37dfe0ddd1e99a5c6f8ad062d47afbcaef43d90caac6d3e7274cca0f
+    network/cuDNN benchmark:
+      runs:
+      - heartbeat: '2026-09-03T15:59:53Z'
+        id: zbvxjhjd
+        name: dreamer_Jamesbond_atari100k_2026-08-31_21-34-39
+        state: finished
+      spec_sha256: 5d0dea8af13b0ac32b5a96fe71d2d27b07621af837d924cb96772bc962d4f552
+    network/torch.compile:
+      runs:
+      - heartbeat: '2026-09-03T22:56:25Z'
+        id: vpz22d3h
+        name: dreamer_Jamesbond_atari100k_2026-09-03_19-59-13
+        state: finished
+      spec_sha256: e363f783c3b1d6457185d94d2fec664e8745ea6b0729c33489b54a58ff1c5259
+  spec_sha256: 613f3e9ab9b0b9a79d184b7ab681079bebab121732246df8cb3056a9b4416de0
 figures/learning_curve:
   entity: your-wandb-entity
   fetched: '1970-01-01'

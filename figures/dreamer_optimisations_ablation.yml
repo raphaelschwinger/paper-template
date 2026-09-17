@@ -1,0 +1,183 @@
+# Butterfly figure — DreamerV3 runtime-optimisation ablation, Atari-100k.
+#
+# Source sweep (launches the runs this figure reads — see that file for the
+# full per-row Hydra overrides):
+#   scripts/sweeps/dreamer_optimisations_ablation.yaml
+#
+#   GPU=2 ./scripts/run_measured_sweep.sh --sweep scripts/sweeps/dreamer_optimisations_ablation.yaml
+#
+# MEASURED SWEEP: runtime numbers are wall-clock and not reproducible off the
+# machine that ran them — see the sweep file's own header.
+#
+# BASELINE IS EVERYTHING OFF. DreamerV3 ships with every one of these tweaks
+# on; the baseline row switches them all off and each row switches exactly one
+# back on. So `plot.delta_reference: first` means a tweak that earns its keep
+# shows up as a NEGATIVE runtime delta.
+#
+# Rows marked `†` have `semantics_preserving: false` in the sweep spec — they
+# change what the learner computes, not just how fast, so their score is a
+# claim about learning rather than a guardrail (see the sweep file's header).
+# `train_ratio512` was declared in the sweep but never run (`enabled: false`);
+# kept here so the figure shows it as skipped rather than silently missing.
+#
+# Every row's `filters:` below is that row's own `overrides:` from the sweep
+# file, translated `key=value` -> `config.key: value` — the same convention
+# `dreamjepa_ablation.yml` and `bbf_speedup_ablation.yml` already use. The
+# eight perf flags are anchored at `&perf_off` (baseline = all off) so each
+# row only states what it changes, mirroring the sweep file's own structure.
+#
+
+document: paper-example 
+
+data:
+  kind: rows
+  entity: LatentLab
+  project: torchrl-hydra-template
+
+  # Shared by every row (`common.overrides` in the sweep file). Row-specific
+  # overrides are the perf flags below, not repeated here.
+  default_filters:
+    state: finished
+    config.trainer.total_frames: 100000
+    config.environment.task: Jamesbond
+    config.checkpoint.enabled: false
+    config.algorithm.world_model_video_log_every: 0
+    config.algorithm.agent_video_log_every: 0
+    config.algorithm._target_: src.algorithms.dreamer.DreamerAlgorithm
+    tags: {$in: [measured, dreamer-opt]}
+    config.exp_name: dreamer
+    
+
+  score:
+    metric: eval/final_return_mean   # e.g. eval/final_return_mean
+  runtime:
+    metric: time/speed   # e.g. time/speed
+    aggregate: history
+
+  rows:
+    - label: Baseline (all runtime tweaks off)
+      section: baseline
+      filters: &perf_off
+        config.algorithm.dreamer_config.compile: false
+        config.algorithm.dreamer_config.perf.amp: "off"
+        config.algorithm.dreamer_config.perf.static_pad: false
+        config.algorithm.dreamer_config.perf.dedup_value: false
+        config.algorithm.dreamer_config.perf.cudnn_benchmark: false
+        config.algorithm.dreamer_config.perf.tf32: false
+        config.algorithm.dreamer_config.perf.foreach_laprop: false
+        config.algorithm.buffer_config.pin_memory: false
+
+    # ----------------------------------------------------------------- network
+    - label: torch.compile
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.compile: true
+    - label: Mixed precision (fp16 + GradScaler) †
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.amp: "fp16"
+    - label: Mixed precision (bf16) †
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.amp: "bf16"
+    - label: Static conv padding
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.static_pad: true
+    - label: cuDNN benchmark
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.cudnn_benchmark: true
+    - label: TF32 matmuls
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.tf32: true
+    - label: Deduplicated value forward
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.dedup_value: true
+    - label: Batched LaProp step
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.dreamer_config.perf.foreach_laprop: true
+    - label: Replay batch 32 †
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.buffer_config.batch_size: 32
+    - label: Replay batch 8 †
+      section: network
+      filters:
+        <<: *perf_off
+        config.algorithm.buffer_config.batch_size: 8
+
+    # -------------------------------------------------------------------- data
+    - label: Pinned staging + async H2D
+      section: data
+      filters:
+        <<: *perf_off
+        config.algorithm.buffer_config.pin_memory: true
+    - label: GPU-resident replay
+      section: data
+      filters:
+        <<: *perf_off
+        config.algorithm.buffer_config.storage_device: "cuda"
+    - label: No online sampling †
+      section: data
+      filters:
+        <<: *perf_off
+        config.algorithm.buffer_config.online: false
+    - label: Train ratio 512 † (declared, not run)
+      section: data
+      filters:
+        <<: *perf_off
+        config.algorithm.train_ratio: 512   # never matches — sweep row has `enabled: false`
+
+plot:
+  kind: butterfly
+  title: DreamerV3 runtime-optimisation ablation — Atari-100k
+  caption: >-
+    Baseline has every tweak off; each row switches exactly one back on. †
+    marks a row that changes what the learner computes, not just its speed.
+  meta_position: spine
+  delta_reference: first
+  width: 14.0
+  row_height: 0.52
+  show_missing: true
+
+  sections:
+    baseline: {name: Baseline, color: "#9aa0a6"}
+    network: {name: Network & optimiser, color: "#5b8ff9"}
+    data: {name: Data pipeline, color: "#f4a95f"}
+    combined: {name: Combined, color: "#3fae7f"}
+
+  score:
+    label: IQM human-normalised score
+    reduce: iqm
+    normalization: human
+    games:
+      Jamesbond-v5: {random: 29.0, human: 302.8}
+    confidence_intervals: true
+    bootstrap_reps: 2000
+    compress_below: auto
+    compress_fraction: 0.25
+    value_format: "{:.1f}"
+    delta_format: "{:+.1f}"
+
+  runtime:
+    label: Training throughput (agent frames/s)
+    reduce: median
+    confidence_intervals: true
+    bootstrap_reps: 2000
+    compress_below: auto
+    compress_fraction: 0.25
+    value_format: "{:.1f}"
+    delta_format: "{:+.1f}"

@@ -36,11 +36,22 @@ between. Identical queries are therefore resolved once and the result copied.
     fetch.py --refresh                    re-run the queries, report the diff
     fetch.py --dataset figures/curves     just one config
     fetch.py --refresh --dry-run          what would it match? write nothing
+
+# Butterfly figures (`data.kind: rows`)
+
+A butterfly chart needs one independent query per row, not the single
+`data.filters:` every other figure uses. Its `data.rows: [{label, section,
+filters}, ...]` is resolved and pinned per row (see `fetch_rows`), so editing
+one row's filters never forces re-resolving the other fourteen. The CSV and
+lock entry still live in the usual places — it is a normal `figures/<name>.yml`
+with `plot.kind: butterfly`, a built-in renderer. See `figures/README.md`.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 import sys
 from datetime import date
@@ -279,6 +290,153 @@ def write_csv(frame, path: Path, decimals: int) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _row_digest(entity: str, project: str, filters: dict) -> str:
+    """Content hash of one row's query — scoped to that row alone.
+
+    Mirrors `spec_sha256`, but per row instead of per config: with fifteen
+    independent queries feeding one CSV, hashing the whole `data:` block would
+    make editing any one row invalidate the pin for all the others too.
+    """
+    canonical = json.dumps(
+        {"entity": entity, "project": project, "filters": filters},
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def _runtime_value(run, metric: str, aggregate: str) -> float | None:
+    """Per-run runtime figure: last logged value, or the median of the series."""
+    if aggregate == "summary":
+        value = run.summary.get(metric)
+        return float(value) if value is not None else None
+
+    try:
+        history = run.history(keys=[metric], pandas=False, samples=2_000)
+    except Exception as exc:
+        print(f"    warning: history for {run.id} unavailable ({exc}); using summary")
+        value = run.summary.get(metric)
+        return float(value) if value is not None else None
+
+    import numpy as np
+
+    values = [row[metric] for row in history if row.get(metric) is not None]
+    return float(np.median(values)) if values else None
+
+
+def fetch_rows(api, pd, config: dict, entry: dict, refresh: bool, dry_run: bool) -> dict | None:
+    """Resolve every row of a butterfly figure (`data.kind: rows`) and write its CSV.
+
+    One row = one independent W&B query (a butterfly chart needs a
+    separate filter per arm, unlike every other figure's single `data.filters`).
+    Each row is pinned and diffed on its own — see `_row_digest`.
+    """
+    spec = config["data"]
+    label = f"{config['kind']}/{config['name']}.yml"
+    entity, project = spec["entity"], spec["project"]
+    default_filters = spec.get("default_filters") or {}
+    rows_cfg = spec.get("rows") or []
+    if not rows_cfg:
+        raise SystemExit(f"error: {label}: `data.rows` is empty")
+
+    score_metric = spec["score"]["metric"]
+    runtime_metric = spec["runtime"]["metric"]
+    runtime_aggregate = spec["runtime"].get("aggregate", "summary")
+    old_rows = entry.get("rows") or {}
+
+    if not refresh:
+        stale = []
+        for row in rows_cfg:
+            arm_key = f"{row['section']}/{row['label']}"
+            filters = {**default_filters, **(row.get("filters") or {})}
+            old = old_rows.get(arm_key)
+            if old is None:
+                stale.append(f"{arm_key}  (never fetched)")
+            elif old.get("spec_sha256") != _row_digest(entity, project, filters):
+                stale.append(f"{arm_key}  (filters changed)")
+        if stale:
+            raise SystemExit(
+                f"error: {label} has row(s) not pinned to their current query:\n"
+                + "\n".join(f"  - {s}" for s in stale)
+                + f"\nResolve them first:  make fetch DATASET={config['kind']}/{config['name']} REFRESH=1"
+            )
+
+    rows_lock: dict[str, dict] = {}
+    records: list[dict] = []
+    for row in rows_cfg:
+        arm_key = f"{row['section']}/{row['label']}"
+        filters = {**default_filters, **(row.get("filters") or {})}
+        if not filters:
+            # No constraint means "every run in the project" — never what a row
+            # wants, and it would silently fill the cache with unrelated runs.
+            print(f"! {row['label']:44s} SKIPPED: empty filters")
+            continue
+        digest = _row_digest(entity, project, filters)
+        old = old_rows.get(arm_key) or {}
+        row_spec = {"entity": entity, "project": project, "filters": filters}
+
+        if refresh:
+            runs = resolve_runs(api, row_spec)
+            report_run_diff(old, runs)
+        else:
+            runs = pinned_runs(api, row_spec, old)
+            print(f"  {row['label']:44s} {len(runs)} pinned run(s)")
+
+        kept, skipped = 0, 0
+        for run in runs:
+            score = run.summary.get(score_metric)
+            if score is None:
+                skipped += 1
+                continue
+            runtime = _runtime_value(run, runtime_metric, runtime_aggregate)
+            records.append(
+                {
+                    "section": row["section"],
+                    "label": row["label"],
+                    "game": run.config.get("env_id", "unknown"),
+                    "seed": run.config.get("seed", ""),
+                    "run_id": run.id,
+                    "wandb_url": f"https://wandb.ai/{entity}/{project}/runs/{run.id}",
+                    "state": run.state,
+                    "score": float(score),
+                    "runtime": "" if runtime is None else float(runtime),
+                }
+            )
+            kept += 1
+        if refresh:
+            detail = f"{kept} run(s)" + (f", {skipped} without {score_metric}" if skipped else "")
+            marker = "  " if kept else "! "
+            print(f"{marker}{row['label']:44s} {detail}")
+
+        rows_lock[arm_key] = {"spec_sha256": digest, "runs": [run_record(r) for r in runs]}
+
+    if dry_run:
+        print("  --dry-run: nothing written")
+        return None
+
+    if not records:
+        # Every row came back empty. Overwriting here would destroy a cache
+        # that is still good.
+        print("\nno runs matched any row; cache left untouched")
+        return None
+
+    frame = pd.DataFrame.from_records(records)
+    decimals = int(spec.get("round", 6))
+    frame = stabilize(pd, frame, decimals, ["section", "label", "game", "seed"])
+    path = cache_path(config["kind"], config["name"])
+    write_csv(frame, path, decimals)
+    print(f"\n  wrote {rel(path)}  ({len(frame)} rows, {len(frame.columns)} columns)")
+
+    return {
+        "entity": entity,
+        "project": project,
+        "spec_sha256": spec_sha256(config),
+        "fetched": str(date.today()),
+        "rows": rows_lock,
+    }
+
+
 def fetch_one(api, pd, config: dict, lock: dict, refresh: bool, dry_run: bool, seen: dict):
     kind, name = config["kind"], config["name"]
     spec = config["data"]
@@ -286,13 +444,22 @@ def fetch_one(api, pd, config: dict, lock: dict, refresh: bool, dry_run: bool, s
     label = f"{kind}/{name}.yml"
 
     data_kind = spec.get("kind", "history")
-    if data_kind not in ("history", "summary"):
-        raise SystemExit(f"error: {label}: unknown `data.kind: {data_kind}` (history|summary)")
+    if data_kind not in ("history", "summary", "rows"):
+        raise SystemExit(
+            f"error: {label}: unknown `data.kind: {data_kind}` (history|summary|rows)"
+        )
     check_configured(spec, label)
 
     entry = lock.get(key) or {}
     digest = spec_sha256(config)
     print(f"\n{key}  ({data_kind})")
+
+    # A butterfly figure's `data.rows` is many independent queries, not one —
+    # editing row 7 must not force re-resolving (and re-pinning) rows 1-6 and
+    # 8-15 too, so it gets its own path with a per-row digest instead of the
+    # single whole-config one below.
+    if data_kind == "rows":
+        return fetch_rows(api, pd, config, entry, refresh, dry_run)
 
     # Two configs with an identical query are one query. Resolving it twice is
     # slow, and can even disagree if a run finishes in between.
