@@ -1,4 +1,4 @@
-# Butterfly ablation figure — DreamerV3 runtime-optimisation ablation, Atari-100k.
+# Butterfly figure — DreamerV3 runtime-optimisation ablation, Atari-100k.
 #
 # Source sweep (launches the runs this figure reads — see that file for the
 # full per-row Hydra overrides):
@@ -142,7 +142,7 @@ data:
         config.algorithm.train_ratio: 512   # never matches — sweep row has `enabled: false`
 
 plot:
-  kind: ablation
+  kind: butterfly
   title: DreamerV3 runtime-optimisation ablation — Atari-100k
   caption: >-
     Baseline has every tweak off; each row switches exactly one back on. †

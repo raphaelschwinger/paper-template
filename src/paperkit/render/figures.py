@@ -1,7 +1,7 @@
 """Built-in figure renderers, and the hook a custom one implements.
 
 A figure config's `plot:` block names a `kind` — `line`, `bar`, `scatter`, or
-`ablation` (a butterfly ablation chart, `paperkit.plotting.ablation`) — and the
+`butterfly` (a two-panel row chart, `paperkit.plotting.butterfly`) — and the
 columns and labels that shape it. That covers most of what a paper needs. When
 it does not, write `figures/<name>.py` beside the config defining either:
 
@@ -25,16 +25,16 @@ from pathlib import Path
 from paperkit.config import cache_path, script_path
 from paperkit.data import load as load_data
 from paperkit.plotting import COLORS, figure, save_figure
-from paperkit.plotting.ablation import draw_ablation
+from paperkit.plotting.butterfly import draw_butterfly
 
 __all__ = ["render_figure"]
 
 # `line`/`bar`/`scatter` draw onto an Axes this module creates at a fixed size.
-# `ablation` needs full control of the canvas (its height depends on the row
+# `butterfly` needs full control of the canvas (its height depends on the row
 # count, it draws no legend, it strips every spine) — same contract as a
 # custom `figures/<name>.py` defining `build(data, cfg)` instead of `draw`.
 KINDS = ("line", "bar", "scatter")
-FULL_CANVAS_KINDS = {"ablation": draw_ablation}
+FULL_CANVAS_KINDS = {"butterfly": draw_butterfly}
 
 
 def _series_color(plot: dict, label: str, index: int) -> str:
@@ -188,7 +188,7 @@ def render_figure(config: dict) -> Path:
     kind = plot.get("kind", "line")
 
     # A custom `.py` always wins — a config can still override a built-in
-    # `ablation` figure with a bespoke `build`/`draw` if it ever needs to.
+    # `butterfly` figure with a bespoke `build`/`draw` if it ever needs to.
     if custom and hasattr(custom, "build"):
         fig = custom.build(data, config)
     elif kind in FULL_CANVAS_KINDS and not (custom and hasattr(custom, "draw")):

@@ -37,14 +37,14 @@ between. Identical queries are therefore resolved once and the result copied.
     fetch.py --dataset figures/curves     just one config
     fetch.py --refresh --dry-run          what would it match? write nothing
 
-# Ablation figures (`data.kind: rows`)
+# Butterfly figures (`data.kind: rows`)
 
-A butterfly ablation chart needs one independent query per row, not the single
+A butterfly chart needs one independent query per row, not the single
 `data.filters:` every other figure uses. Its `data.rows: [{label, section,
 filters}, ...]` is resolved and pinned per row (see `fetch_rows`), so editing
 one row's filters never forces re-resolving the other fourteen. The CSV and
 lock entry still live in the usual places — it is a normal `figures/<name>.yml`
-with `plot.kind: ablation`, a built-in renderer. See `figures/README.md`.
+with `plot.kind: butterfly`, a built-in renderer. See `figures/README.md`.
 """
 
 from __future__ import annotations
@@ -291,7 +291,7 @@ def write_csv(frame, path: Path, decimals: int) -> None:
 
 
 def _row_digest(entity: str, project: str, filters: dict) -> str:
-    """Content hash of one ablation row's query — scoped to that row alone.
+    """Content hash of one row's query — scoped to that row alone.
 
     Mirrors `spec_sha256`, but per row instead of per config: with fifteen
     independent queries feeding one CSV, hashing the whole `data:` block would
@@ -326,9 +326,9 @@ def _runtime_value(run, metric: str, aggregate: str) -> float | None:
 
 
 def fetch_rows(api, pd, config: dict, entry: dict, refresh: bool, dry_run: bool) -> dict | None:
-    """Resolve every row of an ablation figure (`data.kind: rows`) and write its CSV.
+    """Resolve every row of a butterfly figure (`data.kind: rows`) and write its CSV.
 
-    One row = one independent W&B query (a butterfly ablation chart needs a
+    One row = one independent W&B query (a butterfly chart needs a
     separate filter per arm, unlike every other figure's single `data.filters`).
     Each row is pinned and diffed on its own — see `_row_digest`.
     """
@@ -454,7 +454,7 @@ def fetch_one(api, pd, config: dict, lock: dict, refresh: bool, dry_run: bool, s
     digest = spec_sha256(config)
     print(f"\n{key}  ({data_kind})")
 
-    # An ablation figure's `data.rows` is many independent queries, not one —
+    # A butterfly figure's `data.rows` is many independent queries, not one —
     # editing row 7 must not force re-resolving (and re-pinning) rows 1-6 and
     # 8-15 too, so it gets its own path with a per-row digest instead of the
     # single whole-config one below.

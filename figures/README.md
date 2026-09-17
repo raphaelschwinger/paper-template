@@ -80,13 +80,13 @@ then the `plot:` keys are yours to apply or ignore.
 Both forms are picked up automatically. `make configs` shows which figures use
 one.
 
-## Ablation figures
+## Butterfly figures
 
-A butterfly ablation chart (score panel + runtime panel, one row per
-modification) needs a separate W&B query per row, not the single
-`data.filters:` every other figure uses. It is still a normal figure — same
-`.yml`/`.py` pair, same `make fetch`/`make plots` — just with `data.kind: rows`
-instead of `history`/`summary`:
+A butterfly chart (score panel + runtime panel, one row per arm — an ablation's
+modifications, competing methods, a sweep's settings) needs a separate W&B
+query per row, not the single `data.filters:` every other figure uses. It is
+still a normal figure — same `.yml`/`.py` pair, same `make fetch`/`make plots` —
+just with `data.kind: rows` instead of `history`/`summary`:
 
 ```yaml
 data:
@@ -114,11 +114,10 @@ plot:
 
 `tools/fetch.py` resolves and pins each row independently (`_row_digest`), so
 editing one row's filters never forces re-resolving the rest. `plot.kind:
-ablation` is a built-in renderer (`paperkit.plotting.ablation.draw_ablation`),
+butterfly` is a built-in renderer (`paperkit.plotting.butterfly.draw_butterfly`),
 the same way `line`/`bar`/`scatter` are — no `figures/<name>.py` needed.
 
-See `figures/dreamjepa_ablation.yml` and `figures/bbf_speedup_ablation.yml` for
-worked examples.
+See `figures/dreamer_optimisations_ablation.yml` for a worked example.
 
 ## draw.io diagrams
 

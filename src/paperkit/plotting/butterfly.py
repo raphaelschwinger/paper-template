@@ -1,17 +1,18 @@
-"""Built-in renderer for butterfly ablation charts (score + runtime staircase).
+"""Built-in renderer for butterfly charts (score + runtime staircase).
 
 Draws the layout of Rauch et al. (2025), *Can Masked Autoencoders Also Listen
 to Birds?*, Figure 3 — each row a modification, the bar its absolute metric, a
 superscript its change against a reference row, with a second panel so a
 modification's effect on **score** and on **runtime** are read off the same
-rows.
+rows. Ablations are the motivating case, but any set of arms compared on two
+metrics fits — method comparisons, speed-ups, hyperparameter sweeps.
 
 This module never touches W&B — `tools/fetch.py` is the only file that does,
 resolving each `data.rows[].filters:` query into `data/figures/<name>.csv`.
-Every ablation figure is a normal `figures/<name>.yml` with `data.kind: rows`
-and `plot.kind: ablation` — no custom `.py` needed, `paperkit.render.figures`
-dispatches to `draw_ablation` the same way it dispatches `plot.kind: line` to
-the built-in line renderer. See `figures/README.md`, "Ablation figures".
+Every butterfly figure is a normal `figures/<name>.yml` with `data.kind: rows`
+and `plot.kind: butterfly` — no custom `.py` needed, `paperkit.render.figures`
+dispatches to `draw_butterfly` the same way it dispatches `plot.kind: line` to
+the built-in line renderer. See `figures/README.md`, "Butterfly figures".
 """
 
 from __future__ import annotations
@@ -272,8 +273,8 @@ def axis_ticks(compress_below: float | None, lo: float, hi: float) -> list[float
 # -------------------------------------------------------------------- render
 
 
-def draw_ablation(data, cfg: dict):
-    """The `plot.kind: ablation` renderer — see `figures/README.md`, "Ablation figures"."""
+def draw_butterfly(data, cfg: dict):
+    """The `plot.kind: butterfly` renderer — see `figures/README.md`, "Butterfly figures"."""
     plot = cfg["plot"]
     arms = build_arms(cfg)
     populate_samples(arms, data, plot)
