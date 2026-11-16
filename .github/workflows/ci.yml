@@ -10,6 +10,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Read-only by default. Pull requests run repository code (uv sync, make), so
+# only the tag-only `release` job, which checks nothing out, may write.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -61,8 +66,6 @@ jobs:
     name: paper (compile + submission bundle)
     runs-on: ubuntu-latest
     container: texlive/texlive:latest
-    permissions:
-      contents: write  # create the release on tag pushes
     steps:
       # Without git in the container, checkout falls back to a tarball with no
       # history, and the changes PDF below needs the previous tag's sources.
@@ -116,25 +119,48 @@ jobs:
           done
 
       # latexdiff against the previous `v*` tag: deletions struck through in
-      # red, additions underlined in blue. The first release has no previous
-      # tag and ships the plain PDF only; tag an older commit (e.g. v0.0) to
-      # give it a baseline.
+      # red, additions underlined in blue. Required for every document that
+      # existed at that tag: a failed diff fails the release. Without a baseline
+      # there is nothing to compare, so the plain PDF alone ships: the first
+      # release (tag an older commit, e.g. v0.0, to give it one) and a document
+      # added since the previous tag.
       - name: Changes PDF since the previous release
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           set -eu
           PREV=$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null) \
-            || { echo "no previous v* tag, skipping the changes PDF"; exit 0; }
+            || { echo "::notice::no previous v* tag, releasing without changes PDFs"; exit 0; }
           for main in docs/*/main.tex; do
             doc=$(basename "$(dirname "$main")")
             git cat-file -e "$PREV:docs/$doc/main.tex" 2>/dev/null \
-              || { echo "$doc did not exist at $PREV, skipping"; continue; }
+              || { echo "::notice::$doc is new since $PREV, releasing it without a changes PDF"; continue; }
             make diff PAPER="$doc" OLD="$PREV"
             cp "build/$doc-diff/main.pdf" "release/$doc-$GITHUB_REF_NAME-changes-since-$PREV.pdf"
           done
 
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: release-pdfs
+          path: release/*.pdf
+          if-no-files-found: error
+
+  # The only job with write access: it publishes the PDFs `paper` built and
+  # never checks out or runs repository code.
+  release:
+    name: release (attach PDFs to the GitHub Release)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: paper
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-pdfs
+          path: release
+
+      - uses: softprops/action-gh-release@v2
         with:
           files: release/*.pdf
           fail_on_unmatched_files: true

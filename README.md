@@ -318,9 +318,10 @@ git tag v0.3 && git push origin v0.3
 CI then compiles every document and creates a GitHub Release named after the
 tag, with two PDFs per document: `<doc>-v0.3.pdf`, and
 `<doc>-v0.3-changes-since-<previous tag>.pdf` against the previous `v*` tag. The
-release fails if either PDF does not build. The very first tag has nothing to
-compare against and ships the plain PDF only; tag an older commit (e.g. `v0.0`)
-first to give it a baseline.
+release fails if either PDF does not build. Without a baseline there is nothing
+to compare, so only the plain PDF ships: on the very first tag (tag an older
+commit, e.g. `v0.0`, first to give it one) and for a document added since the
+previous tag.
 
 ## Requirements
 
