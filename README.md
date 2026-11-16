@@ -302,6 +302,26 @@ make sync-bib
 With several documents in the project, Overleaf compiles whichever one is set as
 the main document. Switching is a settings change, not a repository change.
 
+## Build and export PDF
+
+`make paper` compiles a document locally to `docs/<doc>/build/main.pdf`.
+`make diff OLD=<git-ref>` compiles a changes PDF against any earlier commit or
+tag — deletions struck through in red, additions underlined in blue — to
+`build/<doc>-diff/main.pdf`.
+
+To publish a version, push a tag starting with `v`:
+
+```bash
+git tag v0.3 && git push origin v0.3
+```
+
+CI then compiles every document and creates a GitHub Release named after the
+tag, with two PDFs per document: `<doc>-v0.3.pdf`, and
+`<doc>-v0.3-changes-since-<previous tag>.pdf` against the previous `v*` tag. The
+release fails if either PDF does not build. The very first tag has nothing to
+compare against and ships the plain PDF only; tag an older commit (e.g. `v0.0`)
+first to give it a baseline.
+
 ## Requirements
 
 | Tool | For | Install |
@@ -340,6 +360,7 @@ git config merge.ours.driver true
 | Lift a coauthor's bib entries | `make bib-absorb PAPER=<doc>` |
 | Word count | `make wordcount` |
 | Diff against an earlier version | `make diff OLD=<git-ref>` |
+| Release a version (PDF + changes PDF) | `git tag v0.3 && git push origin v0.3` |
 | Submission bundle (arXiv / PDF eXpress) | `make arxiv` |
 | Serve the notes site | `make notes` |
 | Pull improvements from the template | `make template-update` |
