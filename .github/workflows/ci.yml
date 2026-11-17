@@ -1,10 +1,19 @@
 name: CI
 
+# Pushing a `v*` tag builds every document and attaches its PDF, plus a
+# latexdiff changes PDF against the previous `v*` tag, to a GitHub Release of
+# that name: `git tag v0.3-draft && git push origin v0.3-draft`.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
+
+# Read-only by default. Pull requests run repository code (uv sync, make), so
+# only the tag-only `release` job, which checks nothing out, may write.
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -58,7 +67,15 @@ jobs:
     runs-on: ubuntu-latest
     container: texlive/texlive:latest
     steps:
+      # Without git in the container, checkout falls back to a tarball with no
+      # history, and the changes PDF below needs the previous tag's sources.
+      - run: command -v git || { apt-get update && apt-get install -y --no-install-recommends git; }
+
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # all history and tags, for `make diff`
+
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: astral-sh/setup-uv@v5
         with:
@@ -88,6 +105,65 @@ jobs:
           name: submission-bundles
           path: build/*-arxiv.zip
           if-no-files-found: ignore
+
+      # Every document's main.pdf is renamed to <document>-<tag>.pdf so the
+      # release assets are distinguishable once downloaded.
+      - name: Collect PDFs for the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -eu
+          mkdir -p release
+          for pdf in docs/*/build/main.pdf; do
+            doc=$(basename "$(dirname "$(dirname "$pdf")")")
+            cp "$pdf" "release/$doc-$GITHUB_REF_NAME.pdf"
+          done
+
+      # latexdiff against the previous `v*` tag: deletions struck through in
+      # red, additions underlined in blue. Required for every document that
+      # existed at that tag: a failed diff fails the release. Without a baseline
+      # there is nothing to compare, so the plain PDF alone ships: the first
+      # release (tag an older commit, e.g. v0.0, to give it one) and a document
+      # added since the previous tag.
+      - name: Changes PDF since the previous release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -eu
+          PREV=$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null) \
+            || { echo "::notice::no previous v* tag, releasing without changes PDFs"; exit 0; }
+          for main in docs/*/main.tex; do
+            doc=$(basename "$(dirname "$main")")
+            git cat-file -e "$PREV:docs/$doc/main.tex" 2>/dev/null \
+              || { echo "::notice::$doc is new since $PREV, releasing it without a changes PDF"; continue; }
+            make diff PAPER="$doc" OLD="$PREV"
+            cp "build/$doc-diff/main.pdf" "release/$doc-$GITHUB_REF_NAME-changes-since-$PREV.pdf"
+          done
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: release-pdfs
+          path: release/*.pdf
+          if-no-files-found: error
+
+  # The only job with write access: it publishes the PDFs `paper` built and
+  # never checks out or runs repository code.
+  release:
+    name: release (attach PDFs to the GitHub Release)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: paper
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-pdfs
+          path: release
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.pdf
+          fail_on_unmatched_files: true
 
   templates:
     name: templates (every template compiles the same prose)

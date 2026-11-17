@@ -148,7 +148,12 @@ diff:  ## latexdiff docs/$(PAPER) against OLD=<git-ref>
 	@cp docs/$(PAPER)/references.bib build/$(PAPER)-diff/
 	@cp docs/$(PAPER)/*.sty docs/$(PAPER)/*.cls docs/$(PAPER)/*.bst docs/$(PAPER)/orcid.pdf \
 	  build/$(PAPER)-diff/ 2>/dev/null || true
-	@cp -r docs/$(PAPER)/figures docs/$(PAPER)/tables build/$(PAPER)-diff/ 2>/dev/null || true
+	# Old assets first, current ones on top: a figure deleted since $(OLD) still
+	# resolves if latexdiff keeps its \includegraphics.
+	@cp -r build/$(PAPER)-diff/old/figures build/$(PAPER)-diff/old/tables \
+	  build/$(PAPER)-diff/old/logos build/$(PAPER)-diff/ 2>/dev/null || true
+	@cp -r docs/$(PAPER)/figures docs/$(PAPER)/tables docs/$(PAPER)/logos \
+	  build/$(PAPER)-diff/ 2>/dev/null || true
 	cd build/$(PAPER)-diff && latexmk -norc -pdf -interaction=nonstopmode main.tex
 	@echo "wrote build/$(PAPER)-diff/main.pdf"
 
