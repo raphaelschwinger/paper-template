@@ -19,6 +19,34 @@
 
 \RequirePackage[most]{tcolorbox}
 \RequirePackage{enumitem}
+\RequirePackage{tabularx}
+\RequirePackage{colortbl}     % \rowcolor in prose tables (== xcolor's [table] option)
+
+%% --- Prose tables -----------------------------------------------------------
+%% Weighted ``X`` columns for tabularx. Coefficients on a row must sum to the
+%% column count, e.g. ``W{0.8}W{1.2}`` on a two-column table.
+\newcolumntype{W}[1]{>{\hsize=#1\hsize\raggedright\arraybackslash}X}
+\definecolor{tableheader}{RGB}{209,224,240}
+\definecolor{tablealt}{RGB}{240,240,240}
+
+%% Full-width shaded table. Use instead of
+%%   \begin{tabularx}{\textwidth}{@{}...@{}}
+%% when rows are shaded with \rowcolor:
+%%
+%%   \begin{prosetable}{W{1.2}W{0.8}}
+%%     \toprule \rowcolor{tableheader} ... \\ \midrule ... \bottomrule
+%%   \end{prosetable}
+%%
+%% colortbl shades \tabcolsep past each cell edge, so with @{} at the outer
+%% edges the shading sticks out beyond the booktabs rules. Here the table is
+%% \tabcolsep wider on each side and shifted left by \tabcolsep: the text stays
+%% flush with the text block, and rules and shading span the same width.
+\newenvironment{prosetable}[1]{%
+  \par\noindent\hspace*{-\tabcolsep}%
+  \tabularx{\dimexpr\linewidth+2\tabcolsep\relax}{#1}%
+}{%
+  \endtabularx\hspace*{-\tabcolsep}\par
+}
 
 %% --- Contributions box ------------------------------------------------------
 %% A boxed, numbered list of contributions, referenceable as C1, C2, ...
