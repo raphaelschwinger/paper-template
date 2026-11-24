@@ -309,6 +309,13 @@ the main document. Switching is a settings change, not a repository change.
 tag — deletions struck through in red, additions underlined in blue — to
 `build/<doc>-diff/main.pdf`.
 
+CI does the same for every pull request that changes a document's `.tex`
+sources: it diffs the pull request against its target branch, uploads the
+result as the `changes-pdf` artifact of the run, and links it from a comment on
+the pull request that is updated on every push. Downloading the artifact needs a
+GitHub sign-in with access to the repository. On a pull request from a fork the
+comment is skipped and the PDF is only on the run page.
+
 To publish a version, push a tag starting with `v`:
 
 ```bash

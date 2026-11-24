@@ -10,8 +10,12 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Pull requests that change a document's .tex sources also get a changes PDF
+# (latexdiff against the target branch) as the `changes-pdf` artifact, linked
+# from a comment on the pull request.
+
 # Read-only by default. Pull requests run repository code (uv sync, make), so
-# only the tag-only `release` job, which checks nothing out, may write.
+# only `release` and `changes-comment`, which check nothing out, may write.
 permissions:
   contents: read
 
@@ -66,6 +70,10 @@ jobs:
     name: paper (compile + submission bundle)
     runs-on: ubuntu-latest
     container: texlive/texlive:latest
+    outputs:
+      changes-docs: ${{ steps.changes.outputs.docs }}
+      changes-failed: ${{ steps.changes.outputs.failed }}
+      changes-url: ${{ steps.changes-upload.outputs.artifact-url }}
     steps:
       # Without git in the container, checkout falls back to a tarball with no
       # history, and the changes PDF below needs the previous tag's sources.
@@ -93,6 +101,53 @@ jobs:
 
       - name: Submission bundle builds
         run: make arxiv
+
+      # Pull requests: a latexdiff changes PDF for every document whose .tex
+      # sources the PR touches, against the target branch: deletions struck
+      # through in red, additions underlined in blue. HEAD is the PR merged into
+      # its target, so this shows exactly what merging would change.
+      # A failed diff warns instead of failing the check: latexdiff chokes on
+      # some markup that compiles fine, and that must not block a merge.
+      - name: Changes PDF against the target branch
+        id: changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -eu
+          BASE="origin/$BASE_REF"
+          mkdir -p changes
+          docs=""
+          failed=""
+          for main in docs/*/main.tex; do
+            doc=$(basename "$(dirname "$main")")
+            # `*` in a git pathspec crosses directories: tables/*.tex count too.
+            if [ -z "$(git diff --name-only "$BASE" HEAD -- "docs/$doc/*.tex")" ]; then
+              continue
+            fi
+            if ! git cat-file -e "$BASE:docs/$doc/main.tex" 2>/dev/null; then
+              echo "::notice::$doc does not exist on $BASE_REF, no changes PDF"
+              continue
+            fi
+            if make diff PAPER="$doc" OLD="$BASE"; then
+              cp "build/$doc-diff/main.pdf" "changes/$doc-changes-vs-$BASE_REF.pdf"
+              docs="$docs $doc"
+            else
+              echo "::warning::latexdiff failed for $doc, see the log of this step"
+              failed="$failed $doc"
+            fi
+          done
+          echo "docs=$(echo $docs)" >> "$GITHUB_OUTPUT"
+          echo "failed=$(echo $failed)" >> "$GITHUB_OUTPUT"
+          [ -n "$docs$failed" ] || echo "no .tex changes under docs/, no changes PDF"
+
+      - uses: actions/upload-artifact@v4
+        id: changes-upload
+        if: steps.changes.outputs.docs != ''
+        with:
+          name: changes-pdf
+          path: changes/*.pdf
+          if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         with:
@@ -164,6 +219,52 @@ jobs:
         with:
           files: release/*.pdf
           fail_on_unmatched_files: true
+
+  # Links the changes PDF from a comment on the pull request, updated in place
+  # on every push. Like `release`, it checks nothing out and runs no repository
+  # code. On a pull request from a fork the token cannot write, so the comment is
+  # skipped there and the PDF stays under the run's artifacts.
+  changes-comment:
+    name: changes (link the changes PDF on the PR)
+    if: >-
+      github.event_name == 'pull_request' &&
+      (needs.paper.outputs.changes-docs != '' || needs.paper.outputs.changes-failed != '')
+    needs: paper
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        continue-on-error: true
+        env:
+          DOCS: ${{ needs.paper.outputs.changes-docs }}
+          FAILED: ${{ needs.paper.outputs.changes-failed }}
+          URL: ${{ needs.paper.outputs.changes-url }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const marker = '<!-- latexdiff-changes-pdf -->';
+            const { DOCS, FAILED, URL, BASE_REF, HEAD_SHA } = process.env;
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const lines = [marker, `### Changes PDF against \`${BASE_REF}\``, ''];
+            if (DOCS) {
+              lines.push(`**[Download the changes PDF](${URL})** (zip) for ${DOCS.split(' ').map(d => `\`${d}\``).join(', ')}: deletions in red, additions in blue.`);
+            }
+            if (FAILED) {
+              lines.push(`latexdiff failed for ${FAILED.split(' ').map(d => `\`${d}\``).join(', ')}, see the [run log](${run}).`);
+            }
+            lines.push('', `<sub>Built from ${HEAD_SHA.slice(0, 7)} merged into \`${BASE_REF}\`, [workflow run](${run}). Updated on every push.</sub>`);
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const mine = comments.find(c => c.body && c.body.startsWith(marker));
+            if (mine) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   templates:
     name: templates (every template compiles the same prose)
