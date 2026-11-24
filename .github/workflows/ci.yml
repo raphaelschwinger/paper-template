@@ -221,14 +221,12 @@ jobs:
           fail_on_unmatched_files: true
 
   # Links the changes PDF from a comment on the pull request, updated in place
-  # on every push. Like `release`, it checks nothing out and runs no repository
+  # on every push (and marked stale if a later push drops the .tex changes). Like `release`, it checks nothing out and runs no repository
   # code. On a pull request from a fork the token cannot write, so the comment is
   # skipped there and the PDF stays under the run's artifacts.
   changes-comment:
     name: changes (link the changes PDF on the PR)
-    if: >-
-      github.event_name == 'pull_request' &&
-      (needs.paper.outputs.changes-docs != '' || needs.paper.outputs.changes-failed != '')
+    if: github.event_name == 'pull_request'
     needs: paper
     runs-on: ubuntu-latest
     permissions:
@@ -248,6 +246,9 @@ jobs:
             const { DOCS, FAILED, URL, BASE_REF, HEAD_SHA } = process.env;
             const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const lines = [marker, `### Changes PDF against \`${BASE_REF}\``, ''];
+            if (!DOCS && !FAILED) {
+              lines.push('This pull request no longer changes any `.tex` sources, so there is no changes PDF.');
+            }
             if (DOCS) {
               lines.push(`**[Download the changes PDF](${URL})** (zip) for ${DOCS.split(' ').map(d => `\`${d}\``).join(', ')}: deletions in red, additions in blue.`);
             }
@@ -260,6 +261,8 @@ jobs:
             const issue_number = context.issue.number;
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
             const mine = comments.find(c => c.body && c.body.startsWith(marker));
+            // Nothing to report and nothing reported before: stay quiet.
+            if (!mine && !DOCS && !FAILED) return;
             if (mine) {
               await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
             } else {
