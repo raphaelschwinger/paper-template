@@ -66,6 +66,28 @@ def build(data, cfg):
 Formatting, LaTeX escaping, writing and provenance stay with the renderer, so a
 custom table still looks like the others and is still checked for staleness.
 
+## Hand-written shaded tables
+
+Tables written directly in the prose (a survey, a comparison) use
+`researchcommon.sty`'s `prosetable`, `W{…}` weighted columns, and the
+`tableheader` / `tablealt` row colours:
+
+```latex
+\begin{prosetable}{W{1.2}W{0.8}}
+  \toprule
+  \rowcolor{tableheader}
+  \textbf{Method} & \textbf{Note} \\
+  \midrule
+  A & first row \\
+  \rowcolor{tablealt}
+  B & shaded row \\
+  \bottomrule
+\end{prosetable}
+```
+
+Prefer it over `\begin{tabularx}{\textwidth}{@{}…@{}}`: with `@{}`, the row
+shading reaches `\tabcolsep` past the booktabs rules on both sides.
+
 ## Rules
 
 - **Never hand-edit the output `.tex`.** `make check-generated` verifies the
